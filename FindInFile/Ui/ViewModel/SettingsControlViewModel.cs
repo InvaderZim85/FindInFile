@@ -132,10 +132,9 @@ namespace FindInFile.Ui.ViewModel
                 BaseColorList = new ObservableCollection<string>(ThemeManager.Current.BaseColors);
                 ColorThemeList = new ObservableCollection<string>(ThemeManager.Current.ColorSchemes);
 
-                var settings = Helper.LoadSettings();
-                SelectedBaseColor = settings.BaseColor;
-                SelectedColorTheme = settings.ThemeColor;
-                SaveLastSearch = settings.SaveLastSearch;
+                SelectedBaseColor = Helper.Settings.BaseColor;
+                SelectedColorTheme = Helper.Settings.ThemeColor;
+                SaveLastSearch = Helper.Settings.SaveLastSearch;
 
                 _init = false;
             }
@@ -154,15 +153,11 @@ namespace FindInFile.Ui.ViewModel
 
             try
             {
-                var settings = new AppSettings
-                {
-                    ThemeColor = SelectedColorTheme,
-                    BaseColor = SelectedBaseColor,
-                    SaveLastSearch = SaveLastSearch
-                };
+                Helper.Settings.ThemeColor = SelectedColorTheme;
+                Helper.Settings.BaseColor = SelectedBaseColor;
+                Helper.Settings.SaveLastSearch = SaveLastSearch;
 
-                if (!Helper.SaveSettings(settings))
-                    await ShowMessage("Error", "Can't save the settings.");
+                Helper.SaveSettings();
             }
             catch (Exception ex)
             {

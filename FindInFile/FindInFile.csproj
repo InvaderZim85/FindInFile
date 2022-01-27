@@ -3,21 +3,17 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
+      <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <PackageIcon>findInFile.png</PackageIcon>
-    <ApplicationIcon>findInFile.ico</ApplicationIcon>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <AssemblyVersion>1.1.1.1</AssemblyVersion>
+    <FileVersion>1.1.1.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="findInFile.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\findInFile.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <Content Include="AppIcon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

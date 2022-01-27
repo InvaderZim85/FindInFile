@@ -15,6 +15,7 @@
     mah:DialogParticipation.Register="{Binding}"
     BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
     BorderThickness="1"
+    Icon="../../AppIcon.ico"
     Loaded="MainWindow_OnLoaded"
     ResizeMode="CanResizeWithGrip"
     TitleCharacterCasing="Normal"

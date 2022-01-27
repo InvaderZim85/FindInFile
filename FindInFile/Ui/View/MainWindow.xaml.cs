@@ -85,10 +85,5 @@ public partial class MainWindow : MetroWindow
     private void Flyout_OnClosingFinished(object sender, RoutedEventArgs e)
     {
         Helper.SetColorTheme();
-
-        // Load the settings
-        var settings = Helper.LoadSettings();
-        if (DataContext is MainWindowViewModel viewModel)
-            viewModel.SaveLastSearch = settings.SaveLastSearch;
     }
 }

@@ -24,6 +24,16 @@ namespace FindInFile
         private static readonly string SettingsFile = Path.Combine(GetBaseFolder(), "Settings.json");
 
         /// <summary>
+        /// Backing field for <see cref="Settings"/>
+        /// </summary>
+        private static AppSettings? _settings;
+
+        /// <summary>
+        /// Gets the app settings
+        /// </summary>
+        public static AppSettings Settings => _settings ??= LoadSettings();
+
+        /// <summary>
         /// Gets the path of the base folder
         /// </summary>
         /// <returns>The path of the base folder</returns>
@@ -36,7 +46,7 @@ namespace FindInFile
         /// Loads the settings
         /// </summary>
         /// <returns>The settings</returns>
-        public static AppSettings LoadSettings()
+        private static AppSettings LoadSettings()
         {
             if (!File.Exists(SettingsFile))
                 return new AppSettings();
@@ -49,19 +59,12 @@ namespace FindInFile
         /// <summary>
         /// Saves the settings
         /// </summary>
-        /// <param name="data">The settings</param>
         /// <returns>true when successful, otherwise false</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public static bool SaveSettings(AppSettings data)
+        public static void SaveSettings()
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            var content = JsonConvert.SerializeObject(data, Formatting.Indented);
+            var content = JsonConvert.SerializeObject(Settings, Formatting.Indented);
 
             File.WriteAllText(SettingsFile, content, Encoding.UTF8);
-
-            return File.Exists(SettingsFile);
         }
 
         /// <summary>

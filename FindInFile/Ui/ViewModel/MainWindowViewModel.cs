@@ -182,11 +182,6 @@ internal sealed class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets the value which indicates if the last search should be saved
-    /// </summary>
-    public bool SaveLastSearch { get; set; }
-
-    /// <summary>
     /// The command to add a new directory
     /// </summary>
     public ICommand AddCommand => new DelegateCommand(AddDirectory);
@@ -317,9 +312,10 @@ internal sealed class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void SaveSettings()
     {
-        Properties.Settings.Default.DirList = SaveLastSearch ? string.Join(";", DirectoryList) : "";
-        Properties.Settings.Default.FilePattern = SaveLastSearch ? FilePattern : "*.*";
-        Properties.Settings.Default.SearchText = SaveLastSearch ? SearchText : "";
+        var saveLastSearch = Helper.Settings.SaveLastSearch;
+        Properties.Settings.Default.DirList = saveLastSearch ? string.Join(";", DirectoryList) : "";
+        Properties.Settings.Default.FilePattern = saveLastSearch ? FilePattern : "*.*";
+        Properties.Settings.Default.SearchText = saveLastSearch ? SearchText : "";
         Properties.Settings.Default.Save();
     }
 
@@ -328,9 +324,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void LoadSettings()
     {
-        var settings = Helper.LoadSettings();
-        SaveLastSearch = settings.SaveLastSearch;
-        if (!SaveLastSearch)
+        if (!Helper.Settings.SaveLastSearch)
             return;
 
         var entries = Properties.Settings.Default.DirList.Split(';').Where(w => !string.IsNullOrEmpty(w)).ToList();
@@ -345,7 +339,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Moves the occurence
+    /// Moves the occurrence
     /// </summary>
     /// <param name="next">true to move to the next</param>
     private void Move(bool next)
@@ -353,10 +347,10 @@ internal sealed class MainWindowViewModel : ViewModelBase
         if (SelectedEntry == null)
             return;
 
-        var maxOccurence = SelectedEntry.Occurence.Count - 1;
+        var maxOccurrence = SelectedEntry.Occurence.Count - 1;
         if (next)
         {
-            if (_currentOccurence == maxOccurence)
+            if (_currentOccurence == maxOccurrence)
                 _currentOccurence = 0;
             else
                 _currentOccurence++;
@@ -364,7 +358,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
         else
         {
             if (_currentOccurence == 0)
-                _currentOccurence = maxOccurence;
+                _currentOccurence = maxOccurrence;
             else
                 _currentOccurence--;
         }
