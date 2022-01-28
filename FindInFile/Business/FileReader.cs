@@ -15,9 +15,17 @@ namespace FindInFile.Business
     internal static class FileReader
     {
         /// <summary>
+        /// The delegate of the progress event
+        /// </summary>
+        /// <param name="maxSteps">The max steps</param>
+        /// <param name="currentStep">The current step</param>
+        /// <param name="message">The message</param>
+        public delegate void ProgressEvent(int maxSteps, int currentStep, string message);
+
+        /// <summary>
         /// Occurs when a progress was made
         /// </summary>
-        public static event EventHandler<string>? Progress; 
+        public static event ProgressEvent? Progress;
 
         /// <summary>
         /// Loads all files of the specified directories and checks if any of the file files contains the given search text
@@ -28,12 +36,12 @@ namespace FindInFile.Business
         /// <returns>The list with the files, which were found</returns>
         public static async Task<List<FileEntry>> Search(List<string> directories, string fileSearchPattern, string searchText)
         {
-            void PrintProgress(int maxCount, int count, string file)
+            static void PrintProgress(int maxCount, int count, string file)
             {
                 var maxLength = maxCount.ToString().Length;
 
                 var message = $"{count.ToString().PadLeft(maxLength, '0')} of {maxCount} - {Path.GetFileName(file)}";
-                Progress?.Invoke("FileReader", message);
+                Progress?.Invoke(maxCount, count, message);
             }
 
             var files = LoadFiles(directories, fileSearchPattern);
@@ -41,16 +49,17 @@ namespace FindInFile.Business
             var result = new List<FileEntry>();
 
             var count = 1;
-            foreach (var file in files)
+            var tmpFiles = files.Distinct().ToList();
+            foreach (var file in files.Distinct())
             {
                 var fileResult = await CheckFile(file, searchText);
                 if (fileResult != null)
                     result.Add(fileResult);
 
-                PrintProgress(files.Count, count++, file);
+                PrintProgress(tmpFiles.Count, count++, file);
             }
 
-            return result;
+            return result.OrderBy(o => o.Path).ThenBy(t => t.Name).ToList();
         }
 
         /// <summary>

@@ -39,7 +39,7 @@ namespace FindInFile
         /// <returns>The path of the base folder</returns>
         private static string GetBaseFolder()
         {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            return AppContext.BaseDirectory;
         }
 
         /// <summary>

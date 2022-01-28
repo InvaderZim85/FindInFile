@@ -15,7 +15,7 @@
     mah:DialogParticipation.Register="{Binding}"
     BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
     BorderThickness="1"
-    Icon="../../AppIcon.ico"
+    Icon="pack://application:,,,/FindInFile;component/AppIcon.ico"
     Loaded="MainWindow_OnLoaded"
     ResizeMode="CanResizeWithGrip"
     TitleCharacterCasing="Normal"
@@ -122,7 +122,7 @@
                         Grid.Row="4"
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
-                        mah:TextBoxHelper.Watermark="The file pattern like *.sql, *.cs"
+                        mah:TextBoxHelper.Watermark="The file pattern like *.sql, *.cs. Separate multiple patterns with a ',' or a ';'"
                         Text="{Binding FilePattern}" />
 
                     <Label
@@ -134,7 +134,11 @@
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
                         mah:TextBoxHelper.Watermark="Here goes your search value..."
-                        Text="{Binding SearchText}" />
+                        Text="{Binding SearchText}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
 
                     <Button
                         Grid.Row="6"
@@ -173,13 +177,13 @@
                                 Binding="{Binding Name}"
                                 Header="Name" />
                             <DataGridTextColumn
-                                Width="Auto"
-                                Binding="{Binding Lines, Mode=OneWay}"
-                                Header="Lines" />
-                            <DataGridTextColumn
                                 Width="*"
                                 Binding="{Binding Path}"
                                 Header="Path" />
+                            <DataGridTextColumn
+                                Width="Auto"
+                                Binding="{Binding Lines, Mode=OneWay}"
+                                Header="Lines" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

@@ -290,7 +290,13 @@ internal sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
-            FileReader.Progress += (_, msg) => progress.SetMessage(msg);
+            FileReader.Progress += (max, count, msg) =>
+            {
+                progress.Maximum = max;
+                progress.Minimum = 0;
+                progress.SetProgress(count);
+                progress.SetMessage(msg);
+            };
 
             var result = await FileReader.Search(DirectoryList.ToList(), FilePattern, SearchText);
             SearchResult = new ObservableCollection<FileEntry>(result);
@@ -315,7 +321,6 @@ internal sealed class MainWindowViewModel : ViewModelBase
         var saveLastSearch = Helper.Settings.SaveLastSearch;
         Properties.Settings.Default.DirList = saveLastSearch ? string.Join(";", DirectoryList) : "";
         Properties.Settings.Default.FilePattern = saveLastSearch ? FilePattern : "*.*";
-        Properties.Settings.Default.SearchText = saveLastSearch ? SearchText : "";
         Properties.Settings.Default.Save();
     }
 
@@ -334,8 +339,6 @@ internal sealed class MainWindowViewModel : ViewModelBase
         FilePattern = Properties.Settings.Default.FilePattern;
         if (string.IsNullOrEmpty(FilePattern))
             FilePattern = "*.*";
-
-        SearchText = Properties.Settings.Default.SearchText;
     }
 
     /// <summary>
