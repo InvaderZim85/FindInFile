@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Input;
 using FindInFile.Business;
 using FindInFile.DataObjects;
@@ -182,6 +183,20 @@ internal sealed class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Backing field for <see cref="IncludeFileName"/>
+    /// </summary>
+    private bool _includeFileName;
+
+    /// <summary>
+    /// Gets or sets the value which indicates if the file name should be included into the search
+    /// </summary>
+    public bool IncludeFileName
+    {
+        get => _includeFileName;
+        set => SetField(ref _includeFileName, value);
+    }
+
+    /// <summary>
     /// The command to add a new directory
     /// </summary>
     public ICommand AddCommand => new DelegateCommand(AddDirectory);
@@ -197,7 +212,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
     public ICommand SearchCommand => new DelegateCommand(Search);
 
     /// <summary>
-    /// The command to move to the next occurence
+    /// The command to move to the next occurrence
     /// </summary>
     public ICommand MoveNextCommand => new DelegateCommand(() => Move(true));
 
@@ -223,7 +238,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
     /// Init the view model
     /// </summary>
     /// <param name="setText">The action to set the text</param>
-    /// <param name="selectLine">The action to selected the occurence</param>
+    /// <param name="selectLine">The action to selected the occurrence</param>
     /// <param name="initFlyOut">The action to init the fly out</param>
     public void InitViewModel(Action<string, string> setText, Action<OccurenceEntry> selectLine, Action initFlyOut)
     {
@@ -286,7 +301,10 @@ internal sealed class MainWindowViewModel : ViewModelBase
 
         SaveSettings();
 
-        var progress = await ShowProgress("Please wait", "Please wait while searching...");
+        var cancellationTokenSource = new CancellationTokenSource();
+        var progress = await ShowProgress("Please wait", "Please wait while searching...", isCancelable: true);
+        progress.Canceled += (_, _) => cancellationTokenSource.Cancel();
+        progress.Closed += (_, _) => cancellationTokenSource.Dispose();
 
         try
         {
@@ -298,7 +316,8 @@ internal sealed class MainWindowViewModel : ViewModelBase
                 progress.SetMessage(msg);
             };
 
-            var result = await FileReader.Search(DirectoryList.ToList(), FilePattern, SearchText);
+            var result = await FileReader.Search(DirectoryList.ToList(), FilePattern, SearchText, IncludeFileName,
+                cancellationTokenSource.Token);
             SearchResult = new ObservableCollection<FileEntry>(result);
 
             ResultInfo = $"Result: {SearchResult.Count} file(s)";

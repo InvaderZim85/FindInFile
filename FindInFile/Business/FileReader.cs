@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FindInFile.DataObjects;
 using Serilog;
@@ -33,8 +34,10 @@ namespace FindInFile.Business
         /// <param name="directories">The list with the directories</param>
         /// <param name="fileSearchPattern">The file search pattern</param>
         /// <param name="searchText">The search text</param>
+        /// <param name="includeFileName">true to include the file name into the search, otherwise false</param>
+        /// <param name="cancellationToken">Token to cancel the search process</param>
         /// <returns>The list with the files, which were found</returns>
-        public static async Task<List<FileEntry>> Search(List<string> directories, string fileSearchPattern, string searchText)
+        public static async Task<List<FileEntry>> Search(List<string> directories, string fileSearchPattern, string searchText, bool includeFileName, CancellationToken cancellationToken)
         {
             static void PrintProgress(int maxCount, int count, string file)
             {
@@ -52,7 +55,10 @@ namespace FindInFile.Business
             var tmpFiles = files.Distinct().ToList();
             foreach (var file in files.Distinct())
             {
-                var fileResult = await CheckFile(file, searchText);
+                if (cancellationToken.IsCancellationRequested)
+                    return result; // Cancel the process and return the already found items
+
+                var fileResult = await CheckFile(file, searchText, includeFileName, cancellationToken);
                 if (fileResult != null)
                     result.Add(fileResult);
 
@@ -90,8 +96,10 @@ namespace FindInFile.Business
         /// </summary>
         /// <param name="filePath">The path of the file</param>
         /// <param name="searchText">The search text</param>
+        /// <param name="includeFileName">true to include the file name into the search, otherwise false</param>
+        /// <param name="cancellationToken">Token to cancel the search process</param>
         /// <returns>The file which contains the search text</returns>
-        private static async Task<FileEntry?> CheckFile(string filePath, string searchText)
+        private static async Task<FileEntry?> CheckFile(string filePath, string searchText, bool includeFileName, CancellationToken cancellationToken)
         {
             try
             {
@@ -101,11 +109,20 @@ namespace FindInFile.Business
                     Path = filePath
                 };
 
-                var content = await File.ReadAllLinesAsync(filePath, Encoding.UTF8);
+                if (includeFileName &&
+                    Path.GetFileName(filePath).Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    result.Occurence.Add(new OccurenceEntry());
+
+                var content = await File.ReadAllLinesAsync(filePath, Encoding.UTF8, cancellationToken);
+                if (content.Length == 0)
+                    return null;
 
                 var lineCount = 1;
                 foreach (var entry in content)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                        return null;
+
                     if (entry.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                         result.Occurence.Add(new OccurenceEntry
                         {
@@ -119,7 +136,7 @@ namespace FindInFile.Business
                 if (!result.Occurence.Any()) 
                     return null;
 
-                result.Content = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+                result.Content = await File.ReadAllTextAsync(filePath, Encoding.UTF8, cancellationToken);
                 return result;
             }
             catch

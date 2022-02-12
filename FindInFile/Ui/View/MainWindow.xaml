@@ -140,6 +140,17 @@
                         </TextBox.InputBindings>
                     </TextBox>
 
+                    <Label
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Content="Include file name:" />
+                    <CheckBox
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Margin="3"
+                        HorizontalAlignment="Left"
+                        IsChecked="{Binding IncludeFileName}" />
+
                     <Button
                         Grid.Row="6"
                         Grid.Column="1"

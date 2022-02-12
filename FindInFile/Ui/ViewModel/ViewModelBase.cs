@@ -76,10 +76,11 @@ namespace FindInFile.Ui.ViewModel
         /// <param name="title">The title of the dialog</param>
         /// <param name="message">The message of the dialog</param>
         /// <param name="setIndeterminate">true to set the controller to indeterminate, otherwise false (optional)</param>
+        /// <param name="isCancelable">the value which indicates if the progress can be cancelled</param>
         /// <returns>The progress controller</returns>
-        protected async Task<ProgressDialogController> ShowProgress(string title, string message, bool setIndeterminate = true)
+        protected async Task<ProgressDialogController> ShowProgress(string title, string message, bool setIndeterminate = true, bool isCancelable = false)
         {
-            var controller = await _dialogCoordinator.ShowProgressAsync(this, title, message);
+            var controller = await _dialogCoordinator.ShowProgressAsync(this, title, message, isCancelable);
             if (setIndeterminate)
                 controller.SetIndeterminate();
 
