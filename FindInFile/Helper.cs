@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -84,6 +85,16 @@ namespace FindInFile
             ThemeManager.Current.ChangeTheme(Application.Current, baseColor, colorTheme);
 
             ExecuteAction("SetTheme");
+        }
+
+        /// <summary>
+        /// Reveals the file in the explorer
+        /// </summary>
+        /// <param name="path">The path of the file</param>
+        public static void OpenInExplorer(string path)
+        {
+            var arguments = $"/n, /e, /select, \"{path}\"";
+            Process.Start("explorer.exe", arguments);
         }
 
         #region Mediator

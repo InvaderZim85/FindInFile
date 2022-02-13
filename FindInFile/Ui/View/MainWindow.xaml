@@ -196,6 +196,12 @@
                                 Binding="{Binding Lines, Mode=OneWay}"
                                 Header="Lines" />
                         </DataGrid.Columns>
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding RevealInExplorerCommand}" Header="Reveal in explorer" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
                     </DataGrid>
                 </Grid>
             </Border>

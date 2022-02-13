@@ -9,6 +9,7 @@ using FindInFile.DataObjects;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ZimLabs.WpfBase.NetCore;
+using Help = System.Windows.Forms.Help;
 
 namespace FindInFile.Ui.ViewModel;
 
@@ -123,7 +124,7 @@ internal sealed class MainWindowViewModel : ViewModelBase
             if (!SetField(ref _selectedEntry, value)) 
                 return;
 
-            // Set the text and jump to the first occurence
+            // Set the text and jump to the first occurrence
             _setText?.Invoke(value?.Content ?? "", SearchText);
             _selectLine?.Invoke(value?.Occurence.FirstOrDefault() ?? new OccurenceEntry());
             _currentOccurence = 0;
@@ -235,6 +236,17 @@ internal sealed class MainWindowViewModel : ViewModelBase
     });
 
     /// <summary>
+    /// The command to reveal the selected file in the explorer
+    /// </summary>
+    public ICommand RevealInExplorerCommand => new DelegateCommand(() =>
+    {
+        if (SelectedEntry == null)
+            return;
+
+        Helper.OpenInExplorer(SelectedEntry.Path);
+    });
+
+    /// <summary>
     /// Init the view model
     /// </summary>
     /// <param name="setText">The action to set the text</param>
@@ -299,6 +311,12 @@ internal sealed class MainWindowViewModel : ViewModelBase
         if (!DirectoryList.Any() || string.IsNullOrEmpty(SearchText))
             return;
 
+        string FormatTimeSpan(TimeSpan value)
+        {
+            return $"{value.Minutes:00}:{value.Seconds:00}";
+        }
+
+        var startTime = DateTime.Now;
         SaveSettings();
 
         var cancellationTokenSource = new CancellationTokenSource();
@@ -310,17 +328,19 @@ internal sealed class MainWindowViewModel : ViewModelBase
         {
             FileReader.Progress += (max, count, msg) =>
             {
+                var elapsed = DateTime.Now - startTime;
                 progress.Maximum = max;
                 progress.Minimum = 0;
                 progress.SetProgress(count);
-                progress.SetMessage(msg);
+                progress.SetMessage($"{msg}{Environment.NewLine}Elapsed: {FormatTimeSpan(elapsed)}");
             };
 
             var result = await FileReader.Search(DirectoryList.ToList(), FilePattern, SearchText, IncludeFileName,
                 cancellationTokenSource.Token);
             SearchResult = new ObservableCollection<FileEntry>(result);
 
-            ResultInfo = $"Result: {SearchResult.Count} file(s)";
+            var duration = DateTime.Now - startTime;
+            ResultInfo = $"Result: {SearchResult.Count} file(s)- Duration: {FormatTimeSpan(duration)}";
         }
         catch (Exception ex)
         {
@@ -386,8 +406,8 @@ internal sealed class MainWindowViewModel : ViewModelBase
         }
 
         // Get the entry
-        var occurence = SelectedEntry.Occurence[_currentOccurence];
-        _selectLine?.Invoke(occurence);
+        var occurrence = SelectedEntry.Occurence[_currentOccurence];
+        _selectLine?.Invoke(occurrence);
     }
 
     /// <summary>
